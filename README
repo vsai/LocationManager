@@ -1,0 +1,13 @@
+README
+
+Start postgresql server:
+pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
+
+Terminate postgresql server
+pg_ctl -D /usr/local/var/postgres stop -s -m fast
+
+Activate virtual environment (has flask, sqlalchemy - maybe:pyscopg2):
+source ~/virt_env/virt1/bin/activate
+
+Deactivate virtual environment:
+deactivate
