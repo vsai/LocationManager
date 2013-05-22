@@ -1,5 +1,3 @@
-#flask end points
-
 from flask import Flask, url_for, request, g
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -17,10 +15,10 @@ def before_request():
 	g.session = Session()
 
 @app.after_request
-def after_request(r):
+def after_request(response):
 	print "After request"
 	g.session.commit()
-	return r
+	return response
 
 @app.teardown_request
 def teardown_request(exception):

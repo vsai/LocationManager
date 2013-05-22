@@ -4,28 +4,32 @@ var getCoordinates = (function(address) {
 				'?address=' + encodeURIComponent(address) + 
 				'&sensor=' + encodeURIComponent(false);
 	console.log(url);
+
+	// callback function to Google Maps API
+	// to retrieve the longitude and latitude
 	$.getJSON(url, function(data) { 
 		console.log(data);
-		console.log(data.status);
-		console.log(data.results.length);
-		if (data.results.length === 1) {
-			console.log("Received 1 option of address");
-		} else if (data.results.length === 0) {
+
+		if (data.status !== 'OK') {
 			console.log("ERROR: Did not receive a valid address");
+			console.log("Retrieved status: " + data.status);
 			return null;
-		} else {
-			console.log("Received more than one option of address");
-			console.log("Returning the first option");
-			// return data[1];
 		}
+
+		if (data.results.length < 1) {
+			console.log("ERROR: UNKNOWN LEN(RESULTS) < 1. Should not have returned OK");
+			return null;
+		} else if (data.results.length === 1) {
+			console.log("Received 1 result");
+		} else {
+			console.log("Received more than one result. Returning first option.");
+		}
+
 		var loc_obj = data.results[0].geometry.location;
 		console.log("location obj: " + loc_obj.lat + " ; " + loc_obj.lng);
 		return loc_obj;
 	});
 });
-
-
-
 
 (function ($) {
 
@@ -33,8 +37,8 @@ var getCoordinates = (function(address) {
 		//Create a model to hold location atribute
 		name: null,
 		address: null,
-		latitude: null,
-		longitude: null
+		// latitude: null,
+		// longitude: null
 	});
 
 	Locs = Backbone.Collection.extend({
@@ -64,16 +68,14 @@ var getCoordinates = (function(address) {
 			console.log("in collectionLocation");
 			var loc_name = $('input[name=name]').val();
 			var loc_addr = $('input[name=address]').val();
-			console.log("collected: " + loc_name + " " + loc_addr);
 			var loc_coords = getCoordinates(loc_addr);
-			console.log("return from loc_coords");
-			console.log(loc_coords);
-			console.log("printed loc_coords");
+
 			if (loc_coords === null) {
 				alert("Not a valid address");
 				return;
 			}
-			var loc_model = new Loc({name: loc_name, address: loc_addr, latitude: loc_coords.lat, longitude: loc_coords.lng});
+			var loc_model = new Loc({name: loc_name, address: loc_addr});
+			// var loc_model = new Loc({name: loc_name, address: loc_addr, latitude: loc_coords.lat, longitude: loc_coords.lng});
 			this.locations.add( loc_model );
 
 			$('input[name=name]').val('');
@@ -83,10 +85,8 @@ var getCoordinates = (function(address) {
 		addLocationLi: function (model) {
 			//The parameter passed is a reference to the model that was added
 			$("#location-list").append("<li>" + model.get('name') + " : " + model.get('address') + "</li>");
-			//Use .get to receive attributes of the model
 		}
 	});
 
 	var appview = new AppView;
-
 })(jQuery);
