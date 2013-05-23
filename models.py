@@ -14,4 +14,8 @@ class Location(Base):
 	lng = Column(String(20))
 
 	def __repr__(self):
+		# return "{'Location' : {'id':'" + self.id "', 'name': " + self.name + " , 'address': " + self.address, 'lat': self.lat, 'lng': self.lng}}"
 		return "<Location('%s', '%s', '%s', '%s')>" % (self.name, self.address, self.lat, self.lng)
+
+	# def jsonify(self):
+	# 	return {"Location" : {'id': self.id, 'name': self.name, 'address': self.address, 'lat': self.lat, 'lng': self.lng}}
