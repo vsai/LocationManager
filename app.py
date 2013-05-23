@@ -15,13 +15,11 @@ app.logger.setLevel('INFO')
 @app.before_request
 def before_request():
 	app.logger.debug("Before Request")
-	# if (request.endpoint == 'create'):
 	g.session = Session()
 
 @app.after_request
 def after_request(response):
 	app.logger.debug("After Request")
-	print response
 	g.session.commit()
 	return response
 
@@ -51,54 +49,82 @@ def createLocation():
 	app.logger.info("Created new location - id: " + str(new_loc.id))
 	return jsonify(new_loc.jsonify())
 
+
 @app.route('/locations', methods=['GET'])
 @app.route('/locations/<int:location_id>', methods=['GET'])
 def readLocation(location_id=None):
 	app.logger.debug("In readLocation - GET request")
+	resultJSON = {}
 	if (location_id == None):
 		# get all 
 		read_loc = g.session.query(Location).all()
 		if (read_loc == None):
 			app.logger.warning("No entries in database")
-			return None
+			resultJSON['status'] = 'fail'
+			resultJSON['results'] = []
+			return jsonify(resultJSON)
 	else:
 		# get specific location_id
 		read_loc = g.session.query(Location).get(location_id)
 		if (read_loc == None):
-			app.logger.warning("No location in database of id: " + str(location_id))
-			return None
+			app.logger.warning("Internal warning: No such ID in db")
+			resultJSON['status'] = 'fail'
+			resultJSON['results'] = []
+			return jsonify(resultJSON)
 		read_loc = [read_loc]
-	# print read_loc
-	lstJSON = []
 
+	lstJSON = []
 	for loc in read_loc:
 		lstJSON.append(loc.jsonify())
-	
-	resultJSON = {}
 	resultJSON['results'] = lstJSON
-
+	resultJSON['status'] = "success"
 	app.logger.info("Got existing location(s)")
 	return jsonify(resultJSON)
 
 @app.route('/locations/<int:location_id>', methods=['PUT'])
 def updateLocation(location_id=None):
 	app.logger.debug("In updateLocation - PUT request")
+	resultJSON = {}
 	if (location_id == None):
-		app.logger.error("No location_id provided in update request")
-		return "fail"
+		app.logger.error("Request Format Error: No id in update request")
+		resultJSON['status'] = 'fail'
+		return jsonify(resultJSON)
+
 	loc_obj = g.session.query(Location).get(location_id)
-
+	if (loc_obj == None):
+		app.logger.warning("Internal warning: No such ID in db")
+		resultJSON['status'] = 'fail'
+		return jsonify(resultJSON)
+	
+	# get all the things to update, and update them
+	loc_obj.name = request.form['name']
+	loc_obj.address = request.form['address']
+	loc_obj.lng = request.form['lng']
+	loc_obj.lat = request.form['lat']
+	
 	app.logger.info("Updated existing location - id: " + str(location_id))
-	return "success"
+	resultJSON['status'] = 'success'
+	return jsonify(resultJSON)
 
-@app.route('/locationsx/<int:location_id>', methods=['GET'])
+@app.route('/locations/<int:location_id>', methods=['DELETE'])
 def deleteLocation(location_id=None):
+	app.logger.debug("In deleteLocation - DELETE request")
+	resultJSON = {}
 	if (location_id == None):
-		app.logger.error("No location_id provided in delete request")
-		return "fail"
-	g.session.query(Location).get(location_id).delete()
-	app.logger.info("Deleted existing location - id: " + str(location_id))
-	return "success"
+		app.logger.error("Request Format Error: No id in delete request")
+		resultJSON['status'] = 'fail'
+		return jsonify(resultJSON)
+
+	loc_obj = g.session.query(Location).get(location_id)
+	if (loc_obj == None):
+		app.logger.warning("Internal warning: No such ID in db")
+		resultJSON['status'] = 'fail'
+		return jsonify(resultJSON)
+
+	loc_obj.delete()
+	app.logger.info("Success: Deleted existing location - id: " + str(location_id))
+	resultJSON['status'] = 'success'
+	return jsonify(resultJSON)
 
 if __name__ == '__main__':
 	app.run(debug=True)
