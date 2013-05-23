@@ -13,5 +13,14 @@ class Location(Base):
 	lat = Column(String(20))
 	lng = Column(String(20))
 
+	def jsonify(self):
+		r = {}
+		r['id'] = self.id
+		r['name'] = self.name
+		r['address'] = self.address
+		r['lat'] = self.lat
+		r['lng'] = self.lng
+		return r
+
 	def __repr__(self):
-		return "<Location('%s', '%s', '%s', '%s')>" % (self.name, self.address, self.lat, self.lng)
+		return "<Location('%d', '%s', '%s', '%s', '%s')>" % (self.id, self.name, self.address, self.lat, self.lng)

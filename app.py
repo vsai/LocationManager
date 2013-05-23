@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, g#, jsonify
+from flask import Flask, url_for, request, g, jsonify
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from models import *
@@ -21,6 +21,7 @@ def before_request():
 @app.after_request
 def after_request(response):
 	app.logger.debug("After Request")
+	print response
 	g.session.commit()
 	return response
 
@@ -48,7 +49,7 @@ def createLocation():
 	g.session.flush()
 	assert(new_loc.id >= 1)
 	app.logger.info("Created new location - id: " + str(new_loc.id))
-	return new_loc.id
+	return jsonify(new_loc.jsonify())
 
 @app.route('/locations', methods=['GET'])
 @app.route('/locations/<int:location_id>', methods=['GET'])
@@ -57,13 +58,27 @@ def readLocation(location_id=None):
 	if (location_id == None):
 		# get all 
 		read_loc = g.session.query(Location).all()
+		if (read_loc == None):
+			app.logger.warning("No entries in database")
+			return None
 	else:
 		# get specific location_id
 		read_loc = g.session.query(Location).get(location_id)
+		if (read_loc == None):
+			app.logger.warning("No location in database of id: " + str(location_id))
+			return None
 		read_loc = [read_loc]
-	print read_loc
+	# print read_loc
+	lstJSON = []
+
+	for loc in read_loc:
+		lstJSON.append(loc.jsonify())
+	
+	resultJSON = {}
+	resultJSON['results'] = lstJSON
+
 	app.logger.info("Got existing location(s)")
-	return str(read_loc)
+	return jsonify(resultJSON)
 
 @app.route('/locations/<int:location_id>', methods=['PUT'])
 def updateLocation(location_id=None):
@@ -72,7 +87,7 @@ def updateLocation(location_id=None):
 		app.logger.error("No location_id provided in update request")
 		return "fail"
 	loc_obj = g.session.query(Location).get(location_id)
-	
+
 	app.logger.info("Updated existing location - id: " + str(location_id))
 	return "success"
 
