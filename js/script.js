@@ -76,6 +76,9 @@
 				}
 				console.log("location coords: " + loc_coords.lat + " ; " + loc_coords.lng);
 				var loc_model = new LocationModel({name: loc_name, address: loc_address, latitude: loc_coords.lat, longitude: loc_coords.lng});
+				// ////////////////////////////////////
+				// TO FIX:
+				// ////////////////////////////////////
 				console.log("finding this.locations");
 				console.log(typeof this.locations);
 				this.locations.add(loc_model);
@@ -125,6 +128,9 @@ function addressSelect(gMapsResults) {
 		result_address = gMapsResults[i].formatted_address;
 		$("#modal_address_options").append("<input type='radio' name='address' value='" + i.toString() + "'>" + result_address + "</input><br>");
 	}
+	// ////////////////////////////////////
+	// TO FIX
+	// ////////////////////////////////////
 	return gMapsResults[0];
 }
 
