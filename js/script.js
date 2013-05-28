@@ -43,11 +43,9 @@
 			var url = 'http://maps.googleapis.com/maps/api/geocode/json' +
 					'?address=' + encodeURIComponent(loc_address) + 
 					'&sensor=' + encodeURIComponent(false);
-			console.log(url);
 
+			var self = this; //to be able to access the locations collection
 			$.getJSON(url, function(data) { 
-				console.log(data);
-
 				if (data.status !== 'OK') {
 					console.log("ERROR: Did not receive a valid address");
 					console.log("Retrieved status: " + data.status);
@@ -76,12 +74,8 @@
 				}
 				console.log("location coords: " + loc_coords.lat + " ; " + loc_coords.lng);
 				var loc_model = new LocationModel({name: loc_name, address: loc_address, latitude: loc_coords.lat, longitude: loc_coords.lng});
-				// ////////////////////////////////////
-				// TO FIX:
-				// ////////////////////////////////////
 				console.log("finding this.locations");
-				console.log(typeof this.locations);
-				this.locations.add(loc_model);
+				self.locations.add(loc_model);
 			});
 			$("#add_location_form > input[name=name]").val('');
 			$("#add_location_form > input[name=address]").val('');
@@ -108,7 +102,7 @@
 			var address =  "<td>" + model.get('address') + "</td>";
 			var moreOptions = "<td>button here</td>";
 			var remove = "<td><button onclick='removeLocation()' class='btn'>X</button></td>";
-			// $("#loc_display_table").append("<tr>" + name + address + moreOptions + remove + "</tr>");
+			$("#loc_display_table").append("<tr>" + name + address + moreOptions + remove + "</tr>");
 		},
 
 		removeLocationLi: function (model) {
@@ -138,7 +132,6 @@ function closeModal(method) {
 	if (method === "submit") {
 		var select;
 	} else {
-
 	}
 	$('#myModal').modal('toggle');
 	$("#add_location_form > input[name=name]").val('');
@@ -149,7 +142,7 @@ function submitModal() {
 	var add_selected = $("#modal_address_options > input[name='address']:checked").val();
 	console.log("YOLOSWAG");
 	console.log(add_selected);
-	// closeModal();
+	closeModal();
 }
 
 function addAlertBox(message, level) {
