@@ -81,7 +81,6 @@
 			$("#add_location_form > input[name=address]").val('');
 		},
 
-
 		removeLocation: function() {
 			console.log("in removeLocation");
 			bootbox.confirm("Are you sure you want to remove this location?", function(result) {
@@ -92,9 +91,8 @@
   				}
   			});
 			console.log("removed");
-			this.locations.remove(elem);
+			// this.locations.remove(elem);
 		},
-
 		
 		addLocationLi: function (model) {
 			//The parameter passed is a reference to the model that was added
