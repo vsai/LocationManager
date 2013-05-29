@@ -1,11 +1,11 @@
 import requests
 
-url = "http://localhost:5000/locations"
 #simulate GET request for ID
 def req_GET_id(idNum):
 	url2 = url + "/" + str(idNum)
 	r = requests.get(url2)
 	print r
+	return r
 	print r.json()
 	return r.json()
 

@@ -26,6 +26,7 @@
 		initialize: function () {
 			console.log("Initialize AppView");
 			this.locations = new LocationCollection( null, { view: this });
+			// new LocationCollection()
 			//Pass it a reference to this view to create a connection between the two
 		},
 		
@@ -45,38 +46,71 @@
 					'&sensor=' + encodeURIComponent(false);
 
 			var self = this; //to be able to access the locations collection
-			$.getJSON(url, function(data) { 
-				if (data.status !== 'OK') {
+			var data = googleAddress(loc_address);
+			if (data.status !== 'OK') {
 					console.log("ERROR: Did not receive a valid address");
 					console.log("Retrieved status: " + data.status);
 					addAlertBox("No such address found. Please try again", "error");
 					return;
 				}
-				var loc_obj;
-				if (data.results.length < 1) {
-					console.log("ERROR: UNKNOWN LEN(RESULTS) < 1. Should not have returned OK");
-					addAlertBox("No such address found. Please try again", "error");
-					return;
-				} else if (data.results.length === 1) {
-					console.log("Received 1 result");
-					loc_obj = data.results[0];
-				} else {
-					console.log("Received more than one result. Returning first option.");
+			var loc_obj;
+			if (data.results.length < 1) {
+				console.log("ERROR: UNKNOWN LEN(RESULTS) < 1. Should not have returned OK");
+				addAlertBox("No such address found. Please try again", "error");
+				return;
+			} else if (data.results.length === 1) {
+				console.log("Received 1 result");
+				loc_obj = data.results[0];
+			} else {
+				console.log("Received more than one result. Returning first option.");
+				loc_obj = addressSelect(data.results);
+			}
+			loc_address = loc_obj.formatted_address;
+			console.log("Formatted Address: " + loc_address);
+			var loc_coords = loc_obj.geometry.location;
+			if (loc_coords === null) {
+				addAlertBox("No such address found. Please try again", "error");
+				return;
+			}
+			console.log("location coords: " + loc_coords.lat + " ; " + loc_coords.lng);
+			var loc_model = new LocationModel({name: loc_name, address: loc_address, latitude: loc_coords.lat, longitude: loc_coords.lng});
+			console.log("finding this.locations");
+			this.locations.add(loc_model);
 
-					loc_obj = addressSelect(data.results);
-				}
-				loc_address = loc_obj.formatted_address;
-				console.log("Formatted Address: " + loc_address);
-				var loc_coords = loc_obj.geometry.location;
-				if (loc_coords === null) {
-					addAlertBox("No such address found. Please try again", "error");
-					return;
-				}
-				console.log("location coords: " + loc_coords.lat + " ; " + loc_coords.lng);
-				var loc_model = new LocationModel({name: loc_name, address: loc_address, latitude: loc_coords.lat, longitude: loc_coords.lng});
-				console.log("finding this.locations");
-				self.locations.add(loc_model);
-			});
+
+
+			// $.getJSON(url, function(data) { 
+				// if (data.status !== 'OK') {
+				// 	console.log("ERROR: Did not receive a valid address");
+				// 	console.log("Retrieved status: " + data.status);
+				// 	addAlertBox("No such address found. Please try again", "error");
+				// 	return;
+				// }
+				// var loc_obj;
+				// if (data.results.length < 1) {
+				// 	console.log("ERROR: UNKNOWN LEN(RESULTS) < 1. Should not have returned OK");
+				// 	addAlertBox("No such address found. Please try again", "error");
+				// 	return;
+				// } else if (data.results.length === 1) {
+				// 	console.log("Received 1 result");
+				// 	loc_obj = data.results[0];
+				// } else {
+				// 	console.log("Received more than one result. Returning first option.");
+
+				// 	loc_obj = addressSelect(data.results);
+				// }
+				// loc_address = loc_obj.formatted_address;
+				// console.log("Formatted Address: " + loc_address);
+				// var loc_coords = loc_obj.geometry.location;
+				// if (loc_coords === null) {
+				// 	addAlertBox("No such address found. Please try again", "error");
+				// 	return;
+				// }
+				// console.log("location coords: " + loc_coords.lat + " ; " + loc_coords.lng);
+				// var loc_model = new LocationModel({name: loc_name, address: loc_address, latitude: loc_coords.lat, longitude: loc_coords.lng});
+				// console.log("finding this.locations");
+				// self.locations.add(loc_model);
+			// });
 			$("#add_location_form > input[name=name]").val('');
 			$("#add_location_form > input[name=address]").val('');
 		},
@@ -165,17 +199,3 @@ function deleteAlertBox() {
 		parent.removeChild(child);
 	}
 }
-// function loadAddressGet(){
-// 	// var loadbarHtml;
-
-// 	// var isMSIE = /*@cc_on!@*/0;
-// 	// if (isMSIE) {
-// 	// 	// if IE
-// 	// 	loadbarHtml = "<div class='progress'><div class='bar' style='width: 60%;'></div></div>";
-// 	// } else {
-// 	// 	loadbarHtml = "<div class='progress progress-striped active'><div class='bar' style='width: 40%;></div></div>";
-// 	// }
-
-// 	// loadbarHtml = "<div class='progress progress-striped active'><div class='bar' style='width: 40%;></div></div>";
-// 	// $("#address_load_panel").append("<p>Loading...</p>" + loadbarHtml);
-// }

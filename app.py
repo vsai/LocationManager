@@ -36,20 +36,19 @@ def teardown_request(exception):
 @app.errorhandler(UberError)
 def custom_uberrror(error):
 	print "HELLO"
-	# print error.num
-	# print error.message
-	return make_response(jsonify( { 'status':'error', 'error': 'YOLOSWAGMONEY', 'message': error.message } ), error.num)
+	x = {404 : 'Not found', 400 : 'Bad request', 500 : 'Internal server error', 200: 'OK'}
+	return make_response(jsonify( { 'status':'error', 'error': x[error.num], 'message': error.message } ), error.num)
 
-@app.errorhandler(404)
-def custom_401(error):
-	app.logger.error("Error handler 404")
-	print error
-	return make_response(jsonify( { 'status':'error', 'error': 'Not found' } ), 404)
+# @app.errorhandler(404)
+# def custom_401(error):
+# 	app.logger.error("Error handler 404")
+# 	print error
+# 	return make_response(jsonify( { 'status':'error', 'error': 'Not found' } ), 404)
 
-@app.errorhandler(400)
-def custom_400(error):
-	app.logger.error("Error handler 400")
-	return make_response(jsonify( { 'status':'error', 'error': 'Bad Request' } ), 404)
+# @app.errorhandler(400)
+# def custom_400(error):
+# 	app.logger.error("Error handler 400")
+# 	return make_response(jsonify( { 'status':'error', 'error': 'Bad Request' } ), 404)
 
 @app.route('/')
 def hello_world():
@@ -62,7 +61,7 @@ def createLocation():
 	try:
 		(lname, laddress, llat, llng) = (x['name'], x['address'], x['lat'], x['lng'])
 	except:
-		abort(400)
+		raise UberError(400, 'form does not include all necessary fields - name, address, lat, lng')
 	new_loc = Location(name = lname, address = laddress, lat = llat, lng = llng)
 	g.session.add(new_loc)
 	g.session.flush()
@@ -75,29 +74,25 @@ def createLocation():
 def readAllLocations():
 	app.logger.debug("In readAllLocations - GET request")
 	read_loc = g.session.query(Location).all()
-	if read_loc:
+	if not read_loc:
 		app.logger.warning("No entries in database")
-		raise UberError(200, "ahhdsohd")
-		# abort(404)
+		raise UberError(404, "No entries found")
 	lstJSON = []
 	for loc in read_loc:
 		lstJSON.append(loc.jsonify())
 	app.logger.info("Got existing location(s)")
-	# return jsonify({'results':lstJSON})
 	return make_response(jsonify( { 'results':lstJSON, 'status': 'OK' } ), 200)
 
 @app.route('/locations/<int:location_id>', methods=['GET'])
 def readLocation(location_id=None):
 	app.logger.debug("In readLocation - GET request")
 	if not location_id:
-		abort(400)
+		raise UberError(400, "Missing location_id parameter")
 	# get specific location_id
 	read_loc = g.session.query(Location).get(location_id)
 	if not read_loc:
 		app.logger.warning("Internal warning: No such ID in db")
-		abort(404)
-	resultJSON = {}
-	resultJSON['results'] = [read_loc.jsonify()]
+		raise UberError(404, "ID not found in database")
 	app.logger.info("Got existing location(s)")
 	return make_response(jsonify( { 'results':[read_loc.jsonify()], 'status': 'OK' } ), 200)
 
@@ -107,16 +102,16 @@ def updateLocation(location_id=None):
 	resultJSON = {}
 	if not location_id:
 		app.logger.error("Request Format Error: No id in update request")
-		abort(400)
+		raise UberError(400, "Missing location_id parameter")
 	loc_obj = g.session.query(Location).get(location_id)
 	if not loc_obj:
 		app.logger.warning("Internal warning: No such ID in db")
-		abort(404)
+		raise UberError(404, "ID not found in database")
 	x = request.form
 	try:
 		(loc_obj.name, loc_obj.address, loc_obj.lat, loc_obj.lng) = (x['name'], x['address'], x['lat'], x['lng'])
 	except:
-		abort(400)
+		raise UberError(400, 'form does not include all necessary fields - name, address, lat, lng')
 	app.logger.info("Updated existing location - id: " + str(location_id))
 	return make_response(jsonify( { 'status': 'OK' } ), 200)
 
@@ -126,11 +121,11 @@ def deleteLocation(location_id=None):
 	resultJSON = {}
 	if not location_id:
 		app.logger.error("Request Format Error: No id in delete request")
-		abort(400)
+		raise UberError(400, "Missing location_id parameter")
 	loc_obj = g.session.query(Location).get(location_id)
 	if not loc_obj:
 		app.logger.warning("Internal warning: No such ID in db")
-		abort(404)
+		raise UberError(404, "ID not found in database")
 	g.session.delete(loc_obj)
 	app.logger.info("Success: Deleted existing location - id: " + str(location_id))
 	return make_response(jsonify( { 'status': 'ok' } ), 200)
