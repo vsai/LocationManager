@@ -1,16 +1,17 @@
-from flask import Flask, url_for, request, g, jsonify, abort, make_response
+from flask import Flask, url_for, request, g, jsonify, abort, make_response, render_template
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from models import *
 from customErrors import *
+import json
 
 engine = create_engine('postgresql://vishalsaidaswani@localhost/myfirstdb')
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind = engine)
 app = Flask(__name__)
 
-app.logger.setLevel('DEBUG')
-# app.logger.setLevel('INFO')
+# app.logger.setLevel('DEBUG')
+app.logger.setLevel('INFO')
 # app.logger.setLevel('WARNING')
 
 app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
@@ -18,51 +19,47 @@ app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 @app.before_request
 def before_request():
 	app.logger.debug("Before Request")
-	g.session = Session()
+	print request
+	print request.endpoint
+	if (request.endpoint != 'hello_world'):
+		g.session = Session()
 
 @app.after_request
 def after_request(response):
 	app.logger.debug("After Request")
-	g.session.commit()
+	if (request.endpoint != 'hello_world'):
+		g.session.commit()
 	return response
 
 @app.teardown_request
 def teardown_request(exception):
 	app.logger.debug("Teardown Request")
-	g.session.close()
+	if (request.endpoint != 'hello_world'):
+		g.session.close()
 	if exception:
+		app.logger.error(exception)
 		app.logger.error("fail - Thrown exception")
 
 @app.errorhandler(UberError)
 def custom_uberrror(error):
-	print "HELLO"
 	x = {404 : 'Not found', 400 : 'Bad request', 500 : 'Internal server error', 200: 'OK'}
 	return make_response(jsonify( { 'status':'error', 'error': x[error.num], 'message': error.message } ), error.num)
 
-# @app.errorhandler(404)
-# def custom_401(error):
-# 	app.logger.error("Error handler 404")
-# 	print error
-# 	return make_response(jsonify( { 'status':'error', 'error': 'Not found' } ), 404)
-
-# @app.errorhandler(400)
-# def custom_400(error):
-# 	app.logger.error("Error handler 400")
-# 	return make_response(jsonify( { 'status':'error', 'error': 'Bad Request' } ), 404)
-
 @app.route('/')
 def hello_world():
-	return 'Hello World!'
+	return render_template('index.html')
+	# return 'Hello World!'
 
 @app.route('/locations', methods=['POST'])
 def createLocation():
 	app.logger.debug("In createLocation - POST request")
-	x = request.form
+	# print request.data
+	x = json.loads(request.data)
 	try:
-		(lname, laddress, llat, llng) = (x['name'], x['address'], x['lat'], x['lng'])
+		(lname, laddress, llat, llng) = (x['name'], x['address'], x['latitude'], x['longitude'])
 	except:
 		raise UberError(400, 'form does not include all necessary fields - name, address, lat, lng')
-	new_loc = Location(name = lname, address = laddress, lat = llat, lng = llng)
+	new_loc = Location(name = lname, address = laddress, latitude = llat, longitude = llng)
 	g.session.add(new_loc)
 	g.session.flush()
 	assert(new_loc.id >= 1)
@@ -74,10 +71,10 @@ def createLocation():
 def readAllLocations():
 	app.logger.debug("In readAllLocations - GET request")
 	read_loc = g.session.query(Location).all()
+	lstJSON = []
 	if not read_loc:
 		app.logger.warning("No entries in database")
-		raise UberError(404, "No entries found")
-	lstJSON = []
+		return make_response(jsonify( { 'results':lstJSON, 'status': 'OK' } ), 200)
 	for loc in read_loc:
 		lstJSON.append(loc.jsonify())
 	app.logger.info("Got existing location(s)")
@@ -107,9 +104,10 @@ def updateLocation(location_id=None):
 	if not loc_obj:
 		app.logger.warning("Internal warning: No such ID in db")
 		raise UberError(404, "ID not found in database")
-	x = request.form
+	x = json.loads(request.data)
 	try:
-		(loc_obj.name, loc_obj.address, loc_obj.lat, loc_obj.lng) = (x['name'], x['address'], x['lat'], x['lng'])
+		(loc_obj.name, loc_obj.address) = (x['name'], x['address'])
+		(loc_obj.latitude, loc_obj.longitude) = (x['latitude'], x['longitude'])
 	except:
 		raise UberError(400, 'form does not include all necessary fields - name, address, lat, lng')
 	app.logger.info("Updated existing location - id: " + str(location_id))
