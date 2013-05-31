@@ -27,32 +27,8 @@
 			} else {
 				return response;
 			}
-			// console.log(Object.keys(response));
-			// console.log(response.results);
-			// var location;
-			// var results_length = response.results.length;
-			// console.log(this);
-
-			// var x = [];
-			// for (var i = 0; i < results_length; i++) {
-				// console.log(JSON.stringify(response.results[i]));
-
-				// x.push(response.results[i]);
-				// this.models.push(response.results[i]);
-			// }
-			// console.log(this.toJSON());
-			// console.log("Returning from parse:");
-			// console.log(x);
-			// console.log(JSON.stringify(x));
-			// console.log(this.models);
-			// console.log("Leaving parse");
-			// return this.models;
-			// var myJsonString = JSON.stringify(x);
-			// return myJsonString;
-			// return x;
 		},
-
-
+		
 		initialize: function (models, options) {
 			this.bind("change", options.view.render, options.view);
 			// this.bind("remove", options.view.render);

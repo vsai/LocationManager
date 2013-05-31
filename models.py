@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String
 Base = declarative_base()
 
 class Location(Base):
-	__tablename__ = 'tbl_locations3'
+	__tablename__ = 'tbl_locations'
 
 	id = Column(Integer, primary_key=True)
 	#lengths of name, latitude, longitude are restricted

@@ -5,22 +5,20 @@ from models import *
 from customErrors import *
 import json
 
-engine = create_engine('postgresql://vishalsaidaswani@localhost/myfirstdb')
+
+app = Flask(__name__)
+app.logger.setLevel('INFO')
+app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
+
+#initialize database
+engine = create_engine('postgresql://vishalsaidaswani@localhost/locationManager')
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind = engine)
-app = Flask(__name__)
 
-# app.logger.setLevel('DEBUG')
-app.logger.setLevel('INFO')
-# app.logger.setLevel('WARNING')
-
-app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 
 @app.before_request
 def before_request():
 	app.logger.debug("Before Request")
-	print request
-	print request.endpoint
 	if (request.endpoint != 'hello_world'):
 		g.session = Session()
 
@@ -47,9 +45,7 @@ def custom_uberrror(error):
 
 @app.route('/')
 def hello_world():
-	# return render_template('index.html')
 	return render_template('test.html')
-	# return 'Hello World!'
 
 @app.route('/locations', methods=['POST'])
 def createLocation():
