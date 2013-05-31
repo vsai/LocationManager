@@ -12,20 +12,20 @@
     <script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
     <script src="static/js/bootbox.min.js"></script>
+    
+
+    <script type="text/template" id="locationViewTemplate">
+            <tr>
+                <td><%=location.name%></td>
+                <td><%=location.address%></td>
+                <td>button here</td>
+                <td><button class='btn'>X</button></td>
+            </tr>
+    </script>
+
     <script src="static/js/script.js"></script>
     <script src="static/js/asyncCalls.js"></script>
-    <!--
-    <script type="text/template" id="locationViewTemplate">
-        <div class="location">
-            <tr>
-                <td><%= location.name%></td>
-                <td><%= location.address%></td>
-                <td>button here</td>
-                <td><button onclick='removeLocation()' class='btn'>X</button></td>
-            </tr>
-        </div>
-    </script>
-    -->
+
     <!-- <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   		<div class="modal-header">
     		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeModal()">&times;</button>
@@ -54,7 +54,7 @@
         	<!-- <p>Hello guys i am a ".hero-unit" and you can use me if you wanna say something important.</p>
         	<p><a class="btn btn-primary btn-large">Super important &raquo;</a></p> -->
         </div>
-        
+
     	<div class="row row-padded">
     		<div class="span6">
     			<h4>Add Location Panel</h4><br>
@@ -83,6 +83,7 @@
     						<th>More Options</th>
     						<th>Remove</th>
     					</tr>
+                    </thead>
     				<tbody id="loc_display_table">
     				</tbody>
     			</table> <!-- .table table-striped -->

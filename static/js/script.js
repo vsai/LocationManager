@@ -14,7 +14,6 @@
 	LocationCollection = Backbone.Collection.extend({
 	//This is our Location collection and holds our Location models
 		model: LocationModel,
-		// url: 'http://127.0.0.1:5000',
 		url: '/locations',
 
 		//Parse the response
@@ -45,14 +44,21 @@
 
 		initialize: function (models, options) {
 			console.log("Initialize location collection");
-			this.bind("add", options.view.addLocationLi);
-			this.bind("remove", options.view.removeLocationLi);
+			// this.bind("add", options.view.addLocationLi);
+			// this.bind("remove", options.view.removeLocationLi);
 		}
 	});
 
-	// LocationView = Backbone.View.extend({
+	LocationView = Backbone.View.extend({
+		tagname: 'div',
+		className: 'locationContainer',
+		template: _.template( $('#locationViewTemplate').html() ),
 
-	// });
+		render: function() {
+			this.$el.html( this.template(this.model.toJSON() ) );
+			return this;
+		}
+	});
 
 	AppView = Backbone.View.extend({
 		el: $("body"),
@@ -74,6 +80,7 @@
 			});
 			console.log("fetching locations");
 			console.log(this.locations.length);
+			this.render();
 		//Pass it a reference to this view to create a connection between the two
 		},
 
@@ -121,21 +128,36 @@
 			console.log("created location model. adding to collection");
 			var abc = this.locations.create(loc_model);
 			console.log(abc);
-			// this.locations.add(loc_model);
+		},
+
+		render: function() {
+			this.locations.each(function (item) {
+				this.renderLocation(item);
+			}, this);
 		},
 
 		removeLocation: function() {
-			console.log("in removeLocation");
-			bootbox.confirm("Are you sure you want to remove this location?", function(result) {
-				console.log(result);
-  				if (result) {
-  					console.log("send remove request to server");
-  					console.log("remove from list");
-  				}
-  			});
+			// console.log("in removeLocation");
+			// bootbox.confirm("Are you sure you want to remove this location?", function(result) {
+			// 	console.log(result);
+  	// 			if (result) {
+  	// 				console.log("send remove request to server");
+  	// 				console.log("remove from list");
+  	// 			}
+  	// 		});
 			console.log("removed");
 			// this.locations.remove(elem);
 		},
+
+		coll: '#loc_display_table',
+
+		renderLocation: function(item) {
+			var loc_view = new this.LocationView({
+				model: item
+			});
+			this.$coll.append(loc_view.render().el );
+		},
+
 		
 		addLocationLi: function (model) {
 			//The parameter passed is a reference to the model that was added
@@ -143,7 +165,7 @@
 			var address =  "<td>" + model.get('address') + "</td>";
 			var moreOptions = "<td>button here</td>";
 			var remove = "<td><button onclick='removeLocation()' class='btn'>X</button></td>";
-			$("#loc_display_table").append("<tr>" + name + address + moreOptions + remove + "</tr>");
+			// $("#loc_display_table").append("<tr>" + name + address + moreOptions + remove + "</tr>");
 		},
 
 		removeLocationLi: function (model) {
@@ -152,7 +174,6 @@
 		}
 	});
 	var appview = new AppView;
-
 })(jQuery);
 
 

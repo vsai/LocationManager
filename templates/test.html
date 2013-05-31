@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>Favorite Location Manager</title>
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+ </head>
+
+ <body>
+    <!-- // <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script> -->
+    <!-- // <script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.4/underscore-min.js"></script> -->
+    <!-- // <script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script> -->
+    <!-- // <script src="http://underscorejs.org/underscore-min.js"></script> -->
+    <!-- // <script src="http://backbonejs.org/backbone-min.js"></script> -->
+    <script src="static/js/jquery-1.10.1.min.js"></script>
+    <script src="static/js/underscore-min.js"></script>
+    <script src="static/js/backbone-min.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/bootbox.min.js"></script>
+    <script src="static/js/asyncCalls.js"></script>
+    
+    <script type="text/template" id="locationViewTemplate">
+                <td><%=name%></td>
+                <td><%=address%></td>
+                <td>button here</td>
+                <td><button class='btn delete_location'>X</button></td>
+    </script>
+
+    <script src="static/js/testScript.js"></script>
+
+    <div class="container">
+    	<div class="row row-padded">
+            <div class="span12" id="alertbox_wrap">
+            </div>
+        </div>
+    	<div class="row">
+    		<div class="span6" id="add_location_panel">
+    			<h4>Add Location Panel</h4><br>
+  		  			<form class="form-inline" id="add_location_form">
+  						<input type="text" class="input-small" placeholder="Name" name="name" id="apple">  
+  						<input type="text" class="input-large" placeholder="Address" name="address" id="bottom"> 
+  						<input type="button" class="btn" id="add-location" value="Add"></input>
+					</form>
+    		</div>
+    	</div>
+    	<div class="row row-padded">
+    		<div class="span6" id="location_list_panel">
+    			<h4>Location List Panel</h4>
+    			<table class="table table-striped table-bordered">
+    				<thead>
+    					<tr>
+    						<th>Name</th>
+    						<th>Address</th>
+    						<th>More Options</th>
+    						<th>Remove</th>
+    					</tr>
+    				</thead>
+    				<tbody id="location_list_view">
+    				</tbody>
+    			</table>
+    		</div>
+    	</div>
+    </div>
+</body>
+</html>
+
+
+
+

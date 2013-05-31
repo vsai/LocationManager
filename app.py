@@ -47,7 +47,8 @@ def custom_uberrror(error):
 
 @app.route('/')
 def hello_world():
-	return render_template('index.html')
+	# return render_template('index.html')
+	return render_template('test.html')
 	# return 'Hello World!'
 
 @app.route('/locations', methods=['POST'])
