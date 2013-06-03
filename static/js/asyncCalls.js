@@ -42,48 +42,47 @@ var googleAddress = function(address){
 	return result;
 };
 
-// web server url
-var server_url = 'http://127.0.0.1:5000/locations'
-// var server_url = 'http://0.0.0.0:5000/locations'
-// create
+// // web server url
+// var server_url = 'http://127.0.0.1:5000/locations'
+// // create
 
-// read Single
-var readSingle = function(id){
-	$.ajax({
-		url: server_url + '/' + id.toString(),
-		type : 'get',
-		dataType: 'application/json',
-		success: function(data){
-			console.log("Success read");
-			console.log(data);
-		}
-	});
-};
+// // read Single
+// var readSingle = function(id){
+// 	$.ajax({
+// 		url: server_url + '/' + id.toString(),
+// 		type : 'get',
+// 		dataType: 'application/json',
+// 		success: function(data){
+// 			console.log("Success read");
+// 			console.log(data);
+// 		}
+// 	});
+// };
 
-// read All
-var readAll = function() {
-	$.ajax({
-		url: server_url,
-		type: 'get',
-		success: function(data){
-			console.log("Success reads");
-			console.log(data);
-		}
-	});
-};
+// // read All
+// var readAll = function() {
+// 	$.ajax({
+// 		url: server_url,
+// 		type: 'get',
+// 		success: function(data){
+// 			console.log("Success reads");
+// 			console.log(data);
+// 		}
+// 	});
+// };
 
-// update
-var updateSingle = function(id, name, address, lng, lat) {
-	$.ajax({
-		url: server_url + "/" + id.toString(),
-		type: 'PUT',
-		data: {'name':name, 'address':address, 'lng':lng, 'lat':lat},
-		success: function(data){
-			console.log("Success update");
-			console.log(data);
-		}
-	});
+// // update
+// var updateSingle = function(id, name, address, lng, lat) {
+// 	$.ajax({
+// 		url: server_url + "/" + id.toString(),
+// 		type: 'PUT',
+// 		data: {'name':name, 'address':address, 'lng':lng, 'lat':lat},
+// 		success: function(data){
+// 			console.log("Success update");
+// 			console.log(data);
+// 		}
+// 	});
 
-};
+// };
 // updateSingle(10, 'yolo', 'swag', 'yeah', 'boi');
 // delete

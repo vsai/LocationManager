@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Favorite Location Manager</title>
     <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/bootstrap-editable.css">
  </head>
 
  <body>
@@ -11,24 +12,23 @@
     <script src="static/js/underscore-min.js"></script>
     <script src="static/js/backbone-min.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/bootstrap-editable.min.js"></script>
     <script src="static/js/bootbox.min.js"></script>
     <script src="static/js/asyncCalls.js"></script>
 
     <script type="text/template" id="locationViewTemplate">
-                <td><%=name%></td>
-                <td><%=address%></td>
-                <td>button here</td>
-                <td><button class='btn delete_location'>X</button></td>
+		<td><%=name%></td>
+		<td><%=address%></td>
+		<td>button here</td>
+		<td><button class='btn delete_location'>X</button></td>
     </script>
-
+<!-- 
+    <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCYKbZ0poE1uhdZbim9pdYYeReUAaKi3es&sensor=false">
+    </script>
+    <script src="static/js/mapRendering.js"></script>
+     -->
     <script src="static/js/testScript.js"></script>
 
-    <!--
-    <script
-src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCYKbZ0poE1uhdZbim9pdYYeReUAaKi3es&sensor=false">
-</script>
-	<script src="static/js/mapRendering.js"></script>
-	-->
     <div class="container">
     	<div class="row row-padded">
             <div class="span12" id="alertbox_wrap">
@@ -41,8 +41,8 @@ src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCYKbZ0poE1uhdZbim9pdYYeReU
     		<div class="span6" id="add_location_panel">
     			<h4>Add Location Panel</h4><br>
   		  			<form class="form-inline" id="add_location_form">
-  						<input type="text" class="input-small" placeholder="Name" name="name" id="apple">  
-  						<input type="text" class="input-large" placeholder="Address" name="address" id="bottom"> 
+  						<input type="text" class="input-small" placeholder="Name" name="name" data-provide="typeahead"autocomplete="off">
+  						<input type="text" class="input-large typeahead" placeholder="Address" name="address" data-provide="typeahead" autocomplete="off">
   						<input type="button" class="btn" id="add-location" value="Add"></input>
 					</form>
     		</div>
@@ -50,8 +50,8 @@ src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCYKbZ0poE1uhdZbim9pdYYeReU
     	<div class="row row-padded">
     		<div class="span6">
     			<h4>Map Viewer Panel</h4>
-    			<div id="map_canvas" style="width:450px;height:380px;"></div>
-    			<!-- <img src="static/img/placeholder.jpg"/> -->
+    			<!-- <div id="map_canvas" style="width:450px;height:380px;"></div> -->
+    			<img src="static/img/placeholder.jpg"/>
     		</div>
     		<div class="span6" id="location_list_panel">
     			<h4>Location List Panel</h4>
@@ -70,6 +70,33 @@ src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCYKbZ0poE1uhdZbim9pdYYeReU
     		</div>
     	</div>
     </div>
+    <div id="footer">
+      <div class="container row row-padded">
+      	<p>Vishalsai Daswani 2013</p>
+      </div>
+    </div>
+
+    <script>
+    	$('#add_location_form > input[name=name]').typeahead({
+    		source: ['work', 'home', 'turn', 'uber', 'san francisco', 'yolo', 'office', 'play', 'park', 'restaurant', 'yummy']
+
+    	});
+    	$('#add_location_form > input[name=address]').typeahead({
+    		source: ['405 Howard St sf CA']
+    	});
+
+  //   	$('.editName').editable({
+		// 	type: 'text'
+		// });
+		// $('.editAddress').editable({
+		// 	type: 'text'
+		// });
+    </script>
+
+
+    
+	
+
 </body>
 </html>
 

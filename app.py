@@ -45,6 +45,7 @@ def custom_uberrror(error):
 
 @app.route('/')
 def hello_world():
+	# return render_template('editabletest.html')
 	return render_template('test.html')
 
 @app.route('/locations', methods=['POST'])
@@ -62,7 +63,8 @@ def createLocation():
 	assert(new_loc.id >= 1)
 	app.logger.info("Created new location - id: " + str(new_loc.id))
 	resultJSON = new_loc.jsonify()
-	return make_response(jsonify( { 'results':resultJSON, 'status': 'OK' } ), 200)
+	return make_response(jsonify( {'id':new_loc.id} ), 200)
+	# return make_response(jsonify( { 'results':resultJSON, 'status': 'OK' } ), 200)
 
 @app.route('/locations', methods=['GET'])
 def readAllLocations():
@@ -88,7 +90,7 @@ def readLocation(location_id=None):
 		app.logger.warning("Internal warning: No such ID in db")
 		raise UberError(404, "ID not found in database")
 	app.logger.info("Got existing location(s)")
-	return make_response(jsonify( { 'results':[read_loc.jsonify()], 'status': 'OK' } ), 200)
+	return make_response(jsonify( { 'results':read_loc.jsonify(), 'status': 'OK' } ), 200)
 
 @app.route('/locations/<int:location_id>', methods=['PUT'])
 def updateLocation(location_id=None):

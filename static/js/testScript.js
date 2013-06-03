@@ -5,6 +5,7 @@
 (function ($) {
 	var LocModel = Backbone.Model.extend({
 		// Model to hold location attributes
+		// url: 'locations',
 		defaults: {
 			name: null,
 			address: null,
@@ -18,7 +19,7 @@
 
 	var LocList = Backbone.Collection.extend({
 		model: LocModel,
-		url: '/locations',
+		url: 'locations',
 
 		parse: function (response) {
 			console.log("Inside Parse");
@@ -28,7 +29,7 @@
 				return response;
 			}
 		},
-		
+
 		initialize: function (models, options) {
 			this.bind("change", options.view.render, options.view);
 			// this.bind("remove", options.view.render);
@@ -38,16 +39,15 @@
 
 	var LocModelView = Backbone.View.extend({
 		tagName: 'tr',
-		// className: 
 		template: _.template($('#locationViewTemplate').html()),
 
 		events: {
 			"click .delete_location" : "deleteLocation"
-
 		}, 
 
 		initialize: function() {
-			// this.listenTo(this.model, "change", this.render);
+			// debugger
+			this.listenTo(this.model, "change", this.render);
 		},
 
 		render: function() {
@@ -60,7 +60,7 @@
 		deleteLocation: function() {
 			// debugger
 			this.model.destroy();
-			this.remove();	
+			this.remove();
 		}
 	});
 
@@ -107,7 +107,16 @@
 										address: new_location.formattedAddress,
 										longitude: new_location.lng,
 										latitude: new_location.lat});
-
+			// var self = this;
+			// new_model.save({
+			// 	success: function(resp) {
+			// 		console.log("success");
+			// 		self.collection.add(resp.attributes.results);
+			// 	},
+			// 	error: function(err) {
+			// 		console.error("ERROR");
+			// 	}
+			// });
 			this.collection.create(new_model);
 			console.log("added");
 		},
@@ -116,9 +125,9 @@
 			console.log("Location List View - rendering");
 			$('#location_list_view').empty();
 			this.collection.each(function(item) {
-				console.log(item);
 				this.renderLocation(item);
 			}, this);
+			// reRenderMap(this.collection);
 			console.log("Exiting rendering");
 		},
 
