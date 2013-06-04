@@ -41,7 +41,9 @@
 		template: _.template($('#locationViewTemplate').html()),
 
 		events: {
-			"click .delete_location" : "deleteLocation"
+			"click .delete_location" : "deleteLocation",
+			"dblclick .updateName" : "updateName", 
+			"dblclick .updateAddress" : "updateAddress"
 		}, 
 
 		initialize: function() {
@@ -56,11 +58,48 @@
 			return this;
 		},
 
+		updateName: function() {
+			var self = this;
+			bootbox.prompt("Enter new name:", function(result) {
+				if (result === null) {
+
+				} else {
+					console.log('changing this models name to: ' + result);
+					self.model.set({name: result});
+					self.model.save();
+				}
+			});
+		},
+
+		updateAddress: function() {
+			var self = this;
+			bootbox.prompt("Enter new address:", function(result) {
+				if (result === null) {
+				} else {
+					console.log('change this models address to: ' + result);
+					var newAdd = searchAddress(result);
+					if (newAdd === null) {
+						bootbox.alert("not a valid address");
+					} else {
+						self.model.set({address: newAdd.formattedAddress, longitude: newAdd.lng, latitude: newAdd.lat});
+						self.model.save();
+					}
+				}
+			})
+		},
+
 		deleteLocation: function() {
-			// debugger
-			console.log("Deleting: " + this);
-			this.model.destroy();
-			this.remove();
+			console.log("in deleteLocation");
+			bootbox.confirm("Are you sure you want to remove this location?", function(result) {
+				console.log(result);
+  				if (result) {
+  					console.log("Deleting: " + this);
+					this.model.destroy();
+					this.remove();
+  					// console.log("send remove request to server");
+  					// console.log("remove from list");
+  				}
+  			});
 		}
 	});
 
