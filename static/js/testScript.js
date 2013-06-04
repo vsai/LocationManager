@@ -90,12 +90,13 @@
 
 		deleteLocation: function() {
 			console.log("in deleteLocation");
+			var self = this;
 			bootbox.confirm("Are you sure you want to remove this location?", function(result) {
 				console.log(result);
   				if (result) {
   					console.log("Deleting: " + this);
-					this.model.destroy();
-					this.remove();
+					self.model.destroy();
+					self.remove();
   					// console.log("send remove request to server");
   					// console.log("remove from list");
   				}
@@ -182,7 +183,7 @@
 			this.collection.each(function(item) {
 				this.renderLocation(item);
 			}, this);
-			// reRenderMap(this.collection);
+			reRenderMap(this.collection);
 			console.log("Exiting rendering");
 		},
 
