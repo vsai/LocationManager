@@ -1,4 +1,5 @@
 var uberOffice = new google.maps.LatLng(37.78853, -122.395144);
+
 function initMap() { 
 	var mapProp = {
 		center: uberOffice,
@@ -8,11 +9,6 @@ function initMap() {
 	var map = new google.maps.Map(document.getElementById("map_canvas"),mapProp);
 }
 
-// var locs = [
-// 	{name: 'uber1', lat: 37.78853, lng: -122.395144},
-// 	{name: 'uber2', lat: 37.98853, lng: -122.395144},
-// 	{name: 'uber3', lat: 37.78853, lng: -122.595144},
-//     ];
 var locs = [];
 
 var getCenterLatLng = function(locations) {

@@ -5,7 +5,6 @@
 (function ($) {
 	var LocModel = Backbone.Model.extend({
 		// Model to hold location attributes
-		// url: 'locations',
 		defaults: {
 			name: null,
 			address: null,
@@ -13,7 +12,7 @@
 			longitude: null
 		},
 		initialize: function() {
-			console.log("This model has been initialized");
+			// console.log("This model has been initialized");
 		}
 	});
 
@@ -59,6 +58,7 @@
 
 		deleteLocation: function() {
 			// debugger
+			console.log("Deleting: " + this);
 			this.model.destroy();
 			this.remove();
 		}
@@ -76,12 +76,12 @@
 			this.collection = new LocList(null, {view: this});
 			this.collection.fetch({
 				success: function(data, xhr) {
-					console.log("YESSSS");
+					// console.log("YESSSS");
 					self.render();
 					return data;
 				},
 				error: function(errorResponse) {
-					console.error("NOOOOOO");
+					// console.error("NOOOOOO");
 				}
 			});
 			// debugger
@@ -117,7 +117,23 @@
 			// 		console.error("ERROR");
 			// 	}
 			// });
-			this.collection.create(new_model);
+			// this.collection.create(new_model);
+			var self = this;
+			this.collection.create(new_model, {
+				wait: true,
+				success: function(resp) {
+					console.log('success callback for collection create');
+					self.render();
+					// return resp;
+
+				},
+				error: function(err) {
+					console.error('error callback for collection create');
+					console.error(err);
+					addAlertBox('did not store to db successfully', 'error');
+					// return err;
+				}
+			});
 			console.log("added");
 		},
 
@@ -132,9 +148,8 @@
 		},
 
 		renderLocation: function(item) {
-			console.log("Location List View - render Location");
-			console.log(item);
-			// debugger
+			// console.log("Location List View - render Location");
+			// console.log(item);
 			var locationView = new LocModelView({model:item});
 			var vHtml = locationView.render().el;
 			$('#location_list_view').append(vHtml);

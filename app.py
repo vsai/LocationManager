@@ -90,7 +90,8 @@ def readLocation(location_id=None):
 		app.logger.warning("Internal warning: No such ID in db")
 		raise UberError(404, "ID not found in database")
 	app.logger.info("Got existing location(s)")
-	return make_response(jsonify( { 'results':read_loc.jsonify(), 'status': 'OK' } ), 200)
+	return make_response(jsonify( read_loc.jsonify() ), 200)
+	# return make_response(jsonify( { 'results':read_loc.jsonify(), 'status': 'OK' } ), 200)
 
 @app.route('/locations/<int:location_id>', methods=['PUT'])
 def updateLocation(location_id=None):
