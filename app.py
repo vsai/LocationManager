@@ -11,7 +11,8 @@ app.logger.setLevel('INFO')
 app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 
 #initialize database
-engine = create_engine('postgresql://vishalsaidaswani@localhost/locationManager')
+#engine = create_engine('postgresql://vishalsaidaswani@localhost/locationManager')
+engine = create_engine('postgres://rxaecylbjtfqkw:fEtK2aZcoOYzZt3S_y1rG1eBQA@ec2-54-197-249-167.compute-1.amazonaws.com:5432/d6bikbf8s4qhhh')
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind = engine)
 
