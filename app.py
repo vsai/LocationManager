@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from models import *
 from customErrors import *
 import json
-
+import os
 
 app = Flask(__name__)
 app.logger.setLevel('INFO')
@@ -130,4 +130,5 @@ def deleteLocation(location_id=None):
 	return make_response(jsonify( { 'status': 'ok' } ), 200)
 
 if __name__ == '__main__':
-	app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+	#app.run(debug=True)
