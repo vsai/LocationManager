@@ -1,213 +1,219 @@
-(function ($) {
+// Improvements:
+// Don't re-render the entire list on a single change
+// 		> How to re-render just the necessary element?
 
-	LocationModel = Backbone.Model.extend({
-		//Create a model to hold location atribute
+(function ($) {
+	var LocModel = Backbone.Model.extend({
+		// Model to hold location attributes
 		defaults: {
-			id: null,
-        	name: null,
+			name: null,
 			address: null,
 			latitude: null,
 			longitude: null
-    	}
+		},
+		initialize: function() {
+			// console.log("This model has been initialized");
+		}
 	});
 
-	LocationCollection = Backbone.Collection.extend({
-	//This is our Location collection and holds our Location models
-		model: LocationModel,
-		url: '/locations',
+	var LocList = Backbone.Collection.extend({
+		model: LocModel,
+		url: 'locations',
 
-		//Parse the response
 		parse: function (response) {
 			console.log("Inside Parse");
-			console.log(Object.keys(response));
-			console.log(response.results);
-			var location;
-			var results_length = response.results.length;
-			console.log(this);
-			var x = [];
-			for (var i = 0; i < results_length; i++) {
-				console.log(JSON.stringify(response.results[i]));
-				x.push(response.results[i]);
-				// this.models.push(response.results[i]);
+			if (response.status === "OK") {
+				return response.results;
+			} else {
+				return response;
 			}
-			// console.log(this.toJSON());
-			console.log("Returning from parse:");
-			console.log(x);
-			console.log(JSON.stringify(x));
-			console.log(this.models);
-			console.log("Leaving parse");
-			// return this.models;
-			// var myJsonString = JSON.stringify(x);
-			// return myJsonString;
-			return x;
 		},
 
 		initialize: function (models, options) {
-			console.log("Initialize location collection");
-			// this.bind("add", options.view.addLocationLi);
-			// this.bind("remove", options.view.removeLocationLi);
+			this.bind("change", options.view.render, options.view);
+			console.log("initialized location list");
 		}
 	});
 
-	LocationView = Backbone.View.extend({
-		tagname: 'div',
-		className: 'locationContainer',
-		template: _.template( $('#locationViewTemplate').html() ),
-
-		render: function() {
-			this.$el.html( this.template(this.model.toJSON() ) );
-			return this;
-		}
-	});
-
-	AppView = Backbone.View.extend({
-		el: $("body"),
-		initialize: function () {
-			console.log("Initialize AppView");
-			this.locations = new LocationCollection( null, { view: this });
-			this.locations.fetch({
-				success: function(data, xhr) {
-					console.log("PLEASE LET THIS WORK!!!!!!!!");
-					console.log(data);
-					console.log(typeof data);
-					console.log(JSON.stringify(data));
-				},
-                error: function(errorResponse) {
-                	console.log("NOOOOOOOOOOO");
-
-                },
-				processData: true
-			});
-			console.log("fetching locations");
-			console.log(this.locations.length);
-			this.render();
-		//Pass it a reference to this view to create a connection between the two
-		},
+	var LocModelView = Backbone.View.extend({
+		tagName: 'tr',
+		template: _.template($('#locationViewTemplate').html()),
 
 		events: {
-			"click #add-location":  "addLocation",
-			"click #remove-location":  "removeLocation",
+			"click .delete_location" : "deleteLocation",
+			"dblclick .updateName" : "updateName", 
+			"dblclick .updateAddress" : "updateAddress"
+		}, 
+
+		initialize: function() {
+			this.listenTo(this.model, "change", this.render);
 		},
 
-		addLocation: function () {
-			console.log("in addLocation");
-			var loc_name = $("input[name=name]").val();
-			var loc_address = $("input[name=address]").val();
+		render: function() {
+			var data = this.model.toJSON();
+			var html = this.template(data);
+			this.$el.html(html);
+			return this;
+		},
+
+		updateName: function() {
+			var self = this;
+			bootbox.prompt("Enter new name:", function(result) {
+				if (result === null) {
+
+				} else {
+					console.log('changing this models name to: ' + result);
+					self.model.set({name: result});
+					self.model.save();
+				}
+			});
+		},
+
+		updateAddress: function() {
+			var self = this;
+			bootbox.prompt("Enter new address:", function(result) {
+				if (result === null) {
+				} else {
+					console.log('change this models address to: ' + result);
+					var newAdd = searchAddress(result);
+					if (newAdd === null) {
+						bootbox.alert("not a valid address");
+					} else {
+						self.model.set({address: newAdd.formattedAddress, longitude: newAdd.lng, latitude: newAdd.lat});
+						self.model.save();
+					}
+				}
+			})
+		},
+
+		deleteLocation: function() {
+			console.log("in deleteLocation");
+			var self = this;
+			bootbox.confirm("Are you sure you want to remove this location?", function(result) {
+				console.log(result);
+  				if (result) {
+  					console.log("Deleting: " + this);
+					self.model.destroy();
+					self.remove();
+  				}
+  			});
+		}
+	});
+
+	var LocListView = Backbone.View.extend({
+		el: $('body'),
+
+		events: {
+			"click #add-location" : "addLocation"
+		},
+
+		initialize: function() {
+			var self = this;
+			this.collection = new LocList(null, {view: this});
+			this.collection.fetch({
+				success: function(data, xhr) {
+					// console.log("YESSSS");
+					self.render();
+					return data;
+				},
+				error: function(errorResponse) {
+					// console.error("NOOOOOO");
+				}
+			});
+			// debugger
+			console.log("initialized location list view");
+		},
+
+		addLocation: function() {
+			console.log("Location List View - adding location");
+			var new_name = $("#add_location_form > input[name=name]").val();
+			var new_address = $("#add_location_form > input[name=address]").val();
 			$("#add_location_form > input[name=name]").val('');
 			$("#add_location_form > input[name=address]").val('');
 
-			// var self = this; //to be able to access the locations collection
-			var data = googleAddress(loc_address);
-			if (data.status !== 'OK') {
-					console.log("ERROR: Did not receive a valid address");
-					console.log("Retrieved status: " + data.status);
-					addAlertBox("No such address found. Please try again", "error");
-					return;
+			var new_location = searchAddress(new_address);
+
+			if (new_location === null) {
+				// console.warn("NO ADDRESS COULD BE FOUND");
+				addAlertBox('No such address found. Please try again.', 'error');
+				return;
+			}
+
+			var new_model = new LocModel({name: new_name, 
+										address: new_location.formattedAddress,
+										longitude: new_location.lng,
+										latitude: new_location.lat});
+
+			var self = this;
+			this.collection.create(new_model, {
+				wait: true,
+				success: function(resp) {
+					console.log('success callback for collection create');
+					self.render();
+					// return resp;
+
+				},
+				error: function(err) {
+					console.error('error callback for collection create');
+					console.error(err);
+					addAlertBox('did not store to db successfully', 'error');
+					// return err;
 				}
-			var loc_obj;
-			if (data.results.length < 1) {
-				console.log("ERROR: UNKNOWN LEN(RESULTS) < 1. Should not have returned OK");
-				addAlertBox("No such address found. Please try again", "error");
-				return;
-			} else if (data.results.length === 1) {
-				console.log("Received 1 result");
-				loc_obj = data.results[0];
-			} else {
-				console.log("Received more than one result. Returning first option.");
-				loc_obj = addressSelect(data.results);
-			}
-			loc_address = loc_obj.formatted_address;
-			console.log("Formatted Address: " + loc_address);
-			var loc_coords = loc_obj.geometry.location;
-			if (loc_coords === null) {
-				addAlertBox("No such address found. Please try again", "error");
-				return;
-			}
-			console.log("location coords: " + loc_coords.lat + " ; " + loc_coords.lng);
-			var loc_model = new LocationModel({name: loc_name, address: loc_address, latitude: loc_coords.lat, longitude: loc_coords.lng});
-			console.log("created location model. adding to collection");
-			var abc = this.locations.create(loc_model);
-			console.log(abc);
+			});
+			console.log("added");
 		},
 
-		render: function() {
-			this.locations.each(function (item) {
+		render: function(){
+			console.log("Location List View - rendering");
+			$('#location_list_view').empty();
+			this.collection.each(function(item) {
 				this.renderLocation(item);
 			}, this);
+			reRenderMap(this.collection);
+			console.log("Exiting rendering");
 		},
-
-		removeLocation: function() {
-			// console.log("in removeLocation");
-			// bootbox.confirm("Are you sure you want to remove this location?", function(result) {
-			// 	console.log(result);
-  	// 			if (result) {
-  	// 				console.log("send remove request to server");
-  	// 				console.log("remove from list");
-  	// 			}
-  	// 		});
-			console.log("removed");
-			// this.locations.remove(elem);
-		},
-
-		coll: '#loc_display_table',
 
 		renderLocation: function(item) {
-			var loc_view = new this.LocationView({
-				model: item
-			});
-			this.$coll.append(loc_view.render().el );
-		},
-
-		
-		addLocationLi: function (model) {
-			//The parameter passed is a reference to the model that was added
-			var name = "<td>" + model.get('name') + "</td>";
-			var address =  "<td>" + model.get('address') + "</td>";
-			var moreOptions = "<td>button here</td>";
-			var remove = "<td><button onclick='removeLocation()' class='btn'>X</button></td>";
-			// $("#loc_display_table").append("<tr>" + name + address + moreOptions + remove + "</tr>");
-		},
-
-		removeLocationLi: function (model) {
-			//The parameter passed is a reference to the model that was removed
-
+			var locationView = new LocModelView({model:item});
+			var vHtml = locationView.render().el;
+			$('#location_list_view').append(vHtml);
 		}
 	});
-	var appview = new AppView;
+
+	var LocationListView = new LocListView();
+
 })(jQuery);
 
-
-function addressSelect(gMapsResults) {
-	$('#myModal').modal('toggle');
-	var result_address;
-	for (var i = 0; i < gMapsResults.length; i++) {
-		result_address = gMapsResults[i].formatted_address;
-		$("#modal_address_options").append("<input type='radio' name='address' value='" + i.toString() + "'>" + result_address + "</input><br>");
+var searchAddress = function(address) {
+	var data = googleAddress(address);
+	if (data.status !== 'OK') {
+		console.log("ERROR: Not valid address. Retrieved status: " + data.status);
+		return null;
 	}
-	// ////////////////////////////////////
-	// TO FIX
-	// ////////////////////////////////////
-	return gMapsResults[0];
-}
-
-function closeModal(method) {
-	if (method === "submit") {
-		var select;
+	var obj;
+	if (data.results.length < 1) {
+		console.log("ERROR: UNKNOWN LEN(RESULTS) < 1. Should not have returned OK");
+		return null;
+	} else if (data.results.length === 1) {
+		obj = data.results[0];
 	} else {
+		console.warn("Received more than one result");
+		obj = data.results[0];
 	}
-	$('#myModal').modal('toggle');
-	$("#add_location_form > input[name=name]").val('');
-	$("#add_location_form > input[name=address]").val('');
-}
+	if (obj.geometry.location === null){
+		return null;
+	}
 
-function submitModal() {
-	var add_selected = $("#modal_address_options > input[name='address']:checked").val();
-	console.log("YOLOSWAG");
-	console.log(add_selected);
-	closeModal("submit");
-}
+	var ret_obj = {};
+	// debugger
+	ret_obj['formattedAddress'] = obj.formatted_address;
+	ret_obj['lng'] = obj.geometry.location.lng;
+	ret_obj['lat'] = obj.geometry.location.lat;
+	return ret_obj;
 
-function addAlertBox(message, level) {
+};
+
+var addAlertBox = function(message, level) {
 	// level = "success" || "error" || "info"
 	deleteAlertBox();
 	if (level !== "success" || level !=="error" || level !== "info") {
@@ -217,9 +223,9 @@ function addAlertBox(message, level) {
 	var close_btn = "<button type = 'button' class='close' data-dismiss='alert'>&times;</button>";
 	var alertBox = "<div class='alert alert-" + level + "' id='alertbox'>" + close_btn + "<p>" + message + "</p></div>";
 	$("#alertbox_wrap").append(alertBox);
-}
+};
 
-function deleteAlertBox() {
+var deleteAlertBox = function() {
 	var parent=document.getElementById("alertbox_wrap");
 	var child=document.getElementById("alertbox");
 	if (child === null) {
@@ -228,4 +234,4 @@ function deleteAlertBox() {
 		console.log("removing child alert box");
 		parent.removeChild(child);
 	}
-}
+};

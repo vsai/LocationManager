@@ -46,13 +46,11 @@ def custom_uberrror(error):
 
 @app.route('/')
 def hello_world():
-	# return render_template('editabletest.html')
-	return render_template('test.html')
+	return render_template('index.html')
 
 @app.route('/locations', methods=['POST'])
 def createLocation():
 	app.logger.debug("In createLocation - POST request")
-	# print request.data
 	x = json.loads(request.data)
 	try:
 		(lname, laddress, llat, llng) = (x['name'], x['address'], x['latitude'], x['longitude'])
@@ -65,7 +63,6 @@ def createLocation():
 	app.logger.info("Created new location - id: " + str(new_loc.id))
 	resultJSON = new_loc.jsonify()
 	return make_response(jsonify( {'id':new_loc.id} ), 200)
-	# return make_response(jsonify( { 'results':resultJSON, 'status': 'OK' } ), 200)
 
 @app.route('/locations', methods=['GET'])
 def readAllLocations():
@@ -92,7 +89,6 @@ def readLocation(location_id=None):
 		raise UberError(404, "ID not found in database")
 	app.logger.info("Got existing location(s)")
 	return make_response(jsonify( read_loc.jsonify() ), 200)
-	# return make_response(jsonify( { 'results':read_loc.jsonify(), 'status': 'OK' } ), 200)
 
 @app.route('/locations/<int:location_id>', methods=['PUT'])
 def updateLocation(location_id=None):
@@ -131,4 +127,3 @@ def deleteLocation(location_id=None):
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-	#app.run(debug=True)
